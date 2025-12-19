@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile Roulette</title>
+    <title>Admin Roulette Wheel</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,26 +12,43 @@
         <div class="wheel-section">
             <div class="container">
                 <div class="pointer"></div>
-                <canvas id="wheelCanvas" width="400" height="400"></canvas>
+                <canvas id="wheelCanvas" width="500" height="500"></canvas>
             </div>
             <button id="spinBtn">TAP TO SPIN</button>
         </div>
 
         <div class="sidebar">
-            <h3>Names List</h3>
-            <textarea id="nameInput" placeholder="Enter names here...">1. Alice
+    <div class="tabs">
+        <button onclick="showTab('history')">Results Log</button>
+        <button onclick="checkAdminPassword()">Admin Panel</button>
+    </div>
+
+       <div id="history-tab" class="tab-content">
+        <h3>Winner History</h3>
+        <ul id="historyList"></ul>
+        <p id="empty-msg">No results yet.</p>
+    </div>
+
+<div id="admin-tab" class="tab-content hidden">
+        <h3>Admin Control</h3>
+        <button class="clear-btn" onclick="clearHistory()">⚠️ CLEAR ALL RESULTS</button>
+        <hr>
+        <p>Edit Names (one per line):</p>
+        <textarea id="nameInput" spellcheck="false">1. Alice
 2. Bob
 3. Charlie
 4. David
 5. Eva</textarea>
-        </div>
+    </div>
+</div>
     </div>
 
     <div id="winner-popup" class="hidden">
         <div class="popup-content">
-            <h2>Winner!</h2>
+            <div class="confetti">✨</div>
+            <h2>The Result is:</h2>
             <h1 id="winner-text"></h1>
-            <button id="closeBtn">Spin Again</button>
+            <button id="closeBtn">OK</button>
         </div>
     </div>
 
