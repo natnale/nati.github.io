@@ -1,66 +1,143 @@
-:root {
-    --gold: #d4af37;
-    --red: #d00000;
+const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+const nameInput = document.getElementById('nameInput');
+const spinBtn = document.getElementById('spinBtn');
+const historyList = document.getElementById('historyList');
+const winnerPopup = document.getElementById('winner-popup');
+const winnerText = document.getElementById('winner-text');
+const closeBtn = document.getElementById('closeBtn');
+
+let names = [];
+let isSpinning = false;
+let currentRotation = 0;
+
+// Update Wheel when names change
+function updateNames() {
+    names = nameInput.value.split('\n').filter(n => n.trim() !== "");
+    drawWheel();
 }
 
-body {
-    background: #111;
-    color: white;
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    overflow-x: hidden;
+function drawWheel() {
+    const sectors = names.length;
+    if (sectors === 0) return;
+    const arc = 2 * Math.PI / sectors;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    names.forEach((name, i) => {
+        const angle = i * arc;
+        ctx.fillStyle = (i % 2 === 0) ? "#d00000" : "#1a1a1a";
+        ctx.beginPath();
+        ctx.moveTo(250, 250);
+        ctx.arc(250, 250, 240, angle, angle + arc);
+        ctx.lineTo(250, 250);
+        ctx.fill();
+        ctx.strokeStyle = "#d4af37";
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(250, 250);
+        ctx.rotate(angle + arc / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "white";
+        ctx.font = sectors > 15 ? "bold 12px Arial" : "bold 16px Arial";
+        ctx.fillText(name, 230, 5);
+        ctx.restore();
+    });
 }
 
-.main-layout { display: flex; height: 100vh; }
+function spin() {
+    if (isSpinning || names.length === 0) return;
+    isSpinning = true;
 
-/* Wheel Layout */
-.wheel-section { flex: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
-canvas { width: 90%; max-width: 450px; height: auto; border: 8px solid var(--gold); border-radius: 50%; transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1); }
+    const spinAmount = (20 * Math.PI) + (Math.random() * 2 * Math.PI);
+    currentRotation += spinAmount;
+    canvas.style.transform = `rotate(${currentRotation}rad)`;
 
-/* Sidebar Tabs */
-.sidebar { flex: 1; background: #222; border-left: 2px solid var(--gold); display: flex; flex-direction: column; }
-.tabs { display: flex; }
-.tabs button { flex: 1; padding: 15px; background: #333; color: white; border: none; cursor: pointer; border-bottom: 2px solid transparent; }
-.tabs button:hover { background: #444; }
+    setTimeout(() => {
+        isSpinning = false;
+        const arc = 2 * Math.PI / names.length;
+        const relativeRotation = currentRotation % (2 * Math.PI);
+        const pointerAngle = 1.5 * Math.PI;
+        
+        let winningIndex = Math.floor((pointerAngle - relativeRotation + 4 * Math.PI) % (2 * Math.PI) / arc);
+        winningIndex = (winningIndex + names.length) % names.length;
 
-.tab-content { padding: 20px; flex: 1; overflow-y: auto; }
-.hidden { display: none !important; }
-
-/* History List */
-#historyList { list-style: none; padding: 0; }
-#historyList li { background: #333; margin-bottom: 5px; padding: 10px; border-radius: 5px; border-left: 4px solid var(--gold); }
-
-textarea { width: 100%; height: 300px; background: #000; color: #0f0; border: 1px solid var(--gold); padding: 10px; font-size: 16px; box-sizing: border-box; }
-
-/* Mobile View */
-@media (max-width: 768px) {
-    .main-layout { flex-direction: column; height: auto; }
-    .wheel-section { height: 70vh; }
-    .sidebar { height: 50vh; border-left: none; border-top: 2px solid var(--gold); }
+        const winner = names[winningIndex];
+        
+        // 1. Record the result
+        recordResult(winner);
+        
+        // 2. Show Popup
+        winnerText.innerText = winner;
+        winnerPopup.classList.remove('hidden');
+    }, 5000);
 }
 
-/* Winner Popup */
-#winner-popup { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); display: flex; align-items:center; justify-content:center; z-index:1000; }
-.popup-content { background: white; color: black; padding: 40px; border-radius: 20px; text-align: center; border: 4px solid var(--gold); }
-/* Add this to your existing style.css */
-.clear-btn {
-    background: #ff4d4d;
-    color: white;
-    border: none;
-    padding: 10px;
-    width: 100%;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-bottom: 20px;
+function recordResult(winner) {
+    const li = document.createElement('li');
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    li.innerHTML = `<strong>${winner}</strong> <small style="float:right">${time}</small>`;
+    historyList.prepend(li); // Adds new winner to the top of the list
 }
 
-.clear-btn:hover {
-    background: #cc0000;
+function clearHistory() {
+    historyList.innerHTML = "";
 }
 
-hr {
-    border: 0;
-    border-top: 1px solid var(--gold);
-    margin: 20px 0;
+function showTab(tabName) {
+    document.getElementById('history-tab').classList.add('hidden');
+    document.getElementById('admin-tab').classList.add('hidden');
+    document.getElementById(tabName + '-tab').classList.remove('hidden');
 }
+
+// Listeners
+nameInput.addEventListener('input', updateNames);
+spinBtn.addEventListener('click', spin);
+closeBtn.addEventListener('click', () => winnerPopup.classList.add('hidden'));
+
+updateNames();
+// ... (keep your existing variables at the top)
+
+const ADMIN_PASSWORD = "1234";
+
+function checkAdminPassword() {
+    const entry = prompt("Enter Admin Password to access settings:");
+    
+    if (entry === ADMIN_PASSWORD) {
+        showTab('admin');
+    } else {
+        alert("Wrong password! Access denied.");
+    }
+}
+
+function showTab(tabName) {
+    // Hide all tabs
+    document.getElementById('history-tab').classList.add('hidden');
+    document.getElementById('admin-tab').classList.add('hidden');
+    
+    // Show selected tab
+    document.getElementById(tabName + '-tab').classList.remove('hidden');
+}
+
+function recordResult(winner) {
+    const msg = document.getElementById('empty-msg');
+    if (msg) msg.style.display = 'none';
+
+    const li = document.createElement('li');
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    li.innerHTML = `<strong>${winner}</strong> <small style="float:right">${time}</small>`;
+    
+    const historyList = document.getElementById('historyList');
+    historyList.prepend(li);
+}
+
+function clearHistory() {
+    if (confirm("Are you sure you want to delete all recorded results?")) {
+        document.getElementById('historyList').innerHTML = "";
+        const msg = document.getElementById('empty-msg');
+        if (msg) msg.style.display = 'block';
+        alert("Results cleared.");
+    }
+}
+
+// ... (keep the rest of your spin and drawing logic)
