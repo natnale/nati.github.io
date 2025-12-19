@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Roulette Wheel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Roulette</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,44 +12,26 @@
         <div class="wheel-section">
             <div class="container">
                 <div class="pointer"></div>
-                <canvas id="wheelCanvas" width="500" height="500"></canvas>
+                <canvas id="wheelCanvas" width="400" height="400"></canvas>
             </div>
-            <div class="controls">
-                <button id="spinBtn">SPIN THE WHEEL</button>
-            </div>
+            <button id="spinBtn">TAP TO SPIN</button>
         </div>
 
         <div class="sidebar">
-            <h3>Edit Names</h3>
-            <p>Enter names (one per line):</p>
-            <textarea id="nameInput" spellcheck="false">1. Alice
+            <h3>Names List</h3>
+            <textarea id="nameInput" placeholder="Enter names here...">1. Alice
 2. Bob
 3. Charlie
 4. David
-5. Eva
-6. Frank
-7. Grace
-8. Henry
-9. Ivy
-10. Jack
-11. Kelly
-12. Liam
-13. Mia
-14. Noah
-15. Olivia
-16. Pete
-17. Quinn
-18. Ryan
-19. Sara
-20. Tom</textarea>
+5. Eva</textarea>
         </div>
     </div>
 
     <div id="winner-popup" class="hidden">
         <div class="popup-content">
-            <h2>We have a winner!</h2>
+            <h2>Winner!</h2>
             <h1 id="winner-text"></h1>
-            <button id="closeBtn">Continue</button>
+            <button id="closeBtn">Spin Again</button>
         </div>
     </div>
 
