@@ -1,81 +1,66 @@
-const canvas = document.getElementById('wheelCanvas');
-const ctx = canvas.getContext('2d');
-const nameInput = document.getElementById('nameInput');
-const spinBtn = document.getElementById('spinBtn');
-const winnerPopup = document.getElementById('winner-popup');
-const winnerText = document.getElementById('winner-text');
-const closeBtn = document.getElementById('closeBtn');
-
-let names = [];
-let isSpinning = false;
-let currentRotation = 0;
-
-function updateNames() {
-    names = nameInput.value.split('\n').filter(n => n.trim() !== "");
-    drawWheel();
+:root {
+    --gold: #d4af37;
+    --red: #d00000;
 }
 
-function drawWheel() {
-    const sectors = names.length;
-    if (sectors === 0) return;
-    const arc = 2 * Math.PI / sectors;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    names.forEach((name, i) => {
-        const angle = i * arc;
-        ctx.fillStyle = (i % 2 === 0) ? "#d00000" : "#1a1a1a";
-        
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, centerX - 10, angle, angle + arc);
-        ctx.lineTo(centerX, centerY);
-        ctx.fill();
-        ctx.strokeStyle = "#d4af37";
-        ctx.stroke();
-
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(angle + arc / 2);
-        ctx.textAlign = "right";
-        ctx.fillStyle = "white";
-        // Adjust font size based on how many names there are
-        let fontSize = sectors > 10 ? 12 : 16;
-        ctx.font = `bold ${fontSize}px Arial`;
-        ctx.fillText(name, centerX - 30, 5);
-        ctx.restore();
-    });
+body {
+    background: #111;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    overflow-x: hidden;
 }
 
-function spin() {
-    if (isSpinning || names.length === 0) return;
-    isSpinning = true;
+.main-layout { display: flex; height: 100vh; }
 
-    const spinAmount = (20 * Math.PI) + (Math.random() * 2 * Math.PI); 
-    currentRotation += spinAmount;
+/* Wheel Layout */
+.wheel-section { flex: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
+canvas { width: 90%; max-width: 450px; height: auto; border: 8px solid var(--gold); border-radius: 50%; transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1); }
 
-    canvas.style.transform = `rotate(${currentRotation}rad)`;
+/* Sidebar Tabs */
+.sidebar { flex: 1; background: #222; border-left: 2px solid var(--gold); display: flex; flex-direction: column; }
+.tabs { display: flex; }
+.tabs button { flex: 1; padding: 15px; background: #333; color: white; border: none; cursor: pointer; border-bottom: 2px solid transparent; }
+.tabs button:hover { background: #444; }
 
-    setTimeout(() => {
-        isSpinning = false;
-        const arc = 2 * Math.PI / names.length;
-        const relativeRotation = currentRotation % (2 * Math.PI);
-        const pointerAngle = (1.5 * Math.PI); 
-        
-        let winningIndex = Math.floor((pointerAngle - relativeRotation + 4 * Math.PI) % (2 * Math.PI) / arc);
-        winningIndex = (winningIndex + names.length) % names.length;
+.tab-content { padding: 20px; flex: 1; overflow-y: auto; }
+.hidden { display: none !important; }
 
-        winnerText.innerText = names[winningIndex];
-        winnerPopup.classList.remove('hidden');
-    }, 5000);
+/* History List */
+#historyList { list-style: none; padding: 0; }
+#historyList li { background: #333; margin-bottom: 5px; padding: 10px; border-radius: 5px; border-left: 4px solid var(--gold); }
+
+textarea { width: 100%; height: 300px; background: #000; color: #0f0; border: 1px solid var(--gold); padding: 10px; font-size: 16px; box-sizing: border-box; }
+
+/* Mobile View */
+@media (max-width: 768px) {
+    .main-layout { flex-direction: column; height: auto; }
+    .wheel-section { height: 70vh; }
+    .sidebar { height: 50vh; border-left: none; border-top: 2px solid var(--gold); }
 }
 
-nameInput.addEventListener('input', updateNames);
-spinBtn.addEventListener('click', spin);
-closeBtn.addEventListener('click', () => {
-    winnerPopup.classList.add('hidden');
-});
+/* Winner Popup */
+#winner-popup { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); display: flex; align-items:center; justify-content:center; z-index:1000; }
+.popup-content { background: white; color: black; padding: 40px; border-radius: 20px; text-align: center; border: 4px solid var(--gold); }
+/* Add this to your existing style.css */
+.clear-btn {
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
 
-updateNames();
+.clear-btn:hover {
+    background: #cc0000;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid var(--gold);
+    margin: 20px 0;
+}
