@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Live Synchronized Roulette</title>
+    <title>Live Multi-Color Roulette</title>
+    
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,40 +15,70 @@
     <div class="main-layout">
         <div class="wheel-section">
             <div class="header">
-                <h1>Live Wheel</h1>
-                <div id="status-light" title="Connected"></div>
+                <h1>Live Game</h1>
+                <div id="status-light" title="Cloud Sync Active"></div>
             </div>
+            
             <div class="container">
                 <div class="pointer"></div>
                 <canvas id="wheelCanvas" width="500" height="500"></canvas>
             </div>
+            
             <button id="spinBtn" class="primary-btn">SPIN FOR EVERYONE</button>
         </div>
 
         <div class="sidebar">
             <div class="tabs">
-                <button class="tab-btn active" id="tab-history" onclick="showTab('history')">Results Log</button>
-                <button class="tab-btn" id="tab-admin" onclick="checkAdminPassword()">Admin Panel</button>
+                <button class="tab-btn active" id="tab-history" onclick="showTab('history')">Results</button>
+                <button class="tab-btn" id="tab-admin" onclick="checkAdminPassword()">Admin</button>
             </div>
 
             <div id="history-content" class="tab-content">
-                <ul id="historyList"></ul>
-                <p id="empty-msg">No results yet.</p>
+                <h3>Winner History</h3>
+                <div class="scroll-box">
+                    <ul id="historyList">
+                        </ul>
+                </div>
             </div>
 
             <div id="admin-content" class="tab-content hidden">
-                <button class="danger-btn" onclick="clearHistory()">CLEAR ALL RESULTS</button>
-                <textarea id="nameInput" placeholder="Enter names (one per line)...">Alice&#10;Bob&#10;Charlie</textarea>
-                <p class="hint">Password: 1234</p>
+                <div class="admin-wrap">
+                    <button class="danger-btn" onclick="clearHistory()">⚠️ CLEAR ALL RESULTS</button>
+                    <hr>
+                    <label for="nameInput">Edit Participants (1-12):</label>
+                    <textarea id="nameInput" spellcheck="false">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13 
+14
+15
+16
+17
+18
+19
+20
+                    </textarea>
+                    <p class="hint">Changes sync instantly to all players.</p>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="winner-popup" class="hidden">
         <div class="popup-card">
-            <h2>Winner!</h2>
-            <h1 id="winner-text"></h1>
-            <button onclick="document.getElementById('winner-popup').classList.add('hidden')">Close</button>
+            <div class="trophy-icon">🏆</div>
+            <h2>And the winner is...</h2>
+            <h1 id="winner-text">---</h1>
+            <button onclick="document.getElementById('winner-popup').classList.add('hidden')" class="close-btn">OK</button>
         </div>
     </div>
 
