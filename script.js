@@ -174,4 +174,13 @@ function showTab(tabName) {
     document.getElementById(tabName + '-content').classList.remove('hidden');
     document.getElementById('tab-' + tabName).classList.add('active');
 }
+function checkAdminPassword() {
+    const entry = prompt("Enter Admin Password:");
+    if (entry === "1234") {
+        showTab('admin');
+    } else {
+        alert("Incorrect Password");
+    }
+}
+
 
