@@ -161,3 +161,17 @@ closeBtn.addEventListener('click', () => winnerPopup.classList.add('hidden'));
 
 // Initial Draw
 updateNames();
+function showTab(tabName) {
+    // 1. Hide BOTH content areas
+    document.getElementById('history-content').classList.add('hidden');
+    document.getElementById('admin-content').classList.add('hidden');
+    
+    // 2. Remove 'active' styling from both buttons
+    document.getElementById('tab-history').classList.remove('active');
+    document.getElementById('tab-admin').classList.remove('active');
+
+    // 3. Show the one you clicked
+    document.getElementById(tabName + '-content').classList.remove('hidden');
+    document.getElementById('tab-' + tabName).classList.add('active');
+}
+
