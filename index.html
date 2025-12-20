@@ -3,60 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin Roulette Wheel</title>
+    <title>Live Roulette | Admin Panel</title>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="main-layout">
         <div class="wheel-section">
+            <div class="header">
+                <h1>Live Wheel</h1>
+                <div id="status-light" title="Connected to Real-time Sync"></div>
+            </div>
+            
             <div class="container">
                 <div class="pointer"></div>
                 <canvas id="wheelCanvas" width="500" height="500"></canvas>
             </div>
-            <button id="spinBtn">TAP TO SPIN</button>
+            
+            <button id="spinBtn" class="primary-btn">SPIN THE WHEEL</button>
         </div>
 
         <div class="sidebar">
-    <div class="tabs">
-        <button onclick="showTab('history')">Results Log</button>
-        <button onclick="checkAdminPassword()">Admin Panel</button>
-    </div>
+            <div class="tabs">
+                <button class="tab-btn active" id="tab-history" onclick="showTab('history')">Results</button>
+                <button class="tab-btn" id="tab-admin" onclick="checkAdminPassword()">Admin</button>
+            </div>
 
-       <div id="history-tab" class="tab-content">
-        <h3>Winner History</h3>
-        <ul id="historyList"></ul>
-        <p id="empty-msg">No results yet.</p>
-    </div>
+            <div id="history-content" class="tab-content">
+                <div class="scroll-area">
+                    <ul id="historyList">
+                        </ul>
+                </div>
+            </div>
 
-<div id="admin-tab" class="tab-content hidden">
-        <h3>Admin Control</h3>
-        <button class="clear-btn" onclick="clearHistory()">⚠️ CLEAR ALL RESULTS</button>
-        <hr>
-        <p>Edit Names (one per line):</p>
-        <textarea id="nameInput" spellcheck="false">1. Alice
-2. Bob
-3. Charlie
-4. David
-5. Eva</textarea>
-    </div>
-</div>
+            <div id="admin-content" class="tab-content hidden">
+                <div class="admin-controls">
+                    <button class="danger-btn" onclick="clearHistory()">CLEAR ALL RESULTS</button>
+                    <label for="nameInput">Participants List:</label>
+                    <textarea id="nameInput" placeholder="Add names here...">Alice&#10;Bob&#10;Charlie</textarea>
+                    <p class="hint">Changes sync to all devices instantly.</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="winner-popup" class="hidden">
-        <div class="popup-content">
-            <div class="confetti">✨</div>
-            <h2>The Result is:</h2>
-            <h1 id="winner-text"></h1>
-            <button id="closeBtn">OK</button>
+        <div class="popup-card">
+            <div class="confetti-icon">🏆</div>
+            <h3>Congratulations!</h3>
+            <h1 id="winner-text">---</h1>
+            <button id="closeBtn" class="secondary-btn">Close</button>
         </div>
     </div>
-  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
-
-<div class="main-layout">
-    ...
-</div>
 
     <script src="script.js"></script>
 </body>
