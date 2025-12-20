@@ -5,182 +5,101 @@ const firebaseConfig = {
   projectId: "spin-the-wheel-a5901",
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
+const db = firebase.database();
 
-// --- 2. DOM ELEMENTS ---
 const canvas = document.getElementById('wheelCanvas');
 const ctx = canvas.getContext('2d');
 const nameInput = document.getElementById('nameInput');
 const spinBtn = document.getElementById('spinBtn');
 const historyList = document.getElementById('historyList');
-const winnerPopup = document.getElementById('winner-popup');
-const winnerText = document.getElementById('winner-text');
-const closeBtn = document.getElementById('closeBtn');
 
 let names = [];
 let isSpinning = false;
 let currentRotation = 0;
 
-// --- 3. WHEEL DRAWING LOGIC ---
-function updateNames() {
-    names = nameInput.value.split('\n').filter(n => n.trim() !== "");
-    drawWheel();
+// 2. ADMIN & TABS
+function checkAdminPassword() {
+    if (prompt("Enter Password:") === "1234") { showTab('admin'); } 
+    else { alert("Wrong password!"); }
 }
 
+function showTab(tabName) {
+    document.getElementById('history-content').classList.add('hidden');
+    document.getElementById('admin-content').classList.add('hidden');
+    document.getElementById('tab-history').classList.remove('active');
+    document.getElementById('tab-admin').classList.remove('active');
+
+    document.getElementById(tabName + '-content').classList.remove('hidden');
+    document.getElementById('tab-' + tabName).classList.add('active');
+}
+
+// 3. WHEEL DRAWING
 function drawWheel() {
     const sectors = names.length;
     if (sectors === 0) return;
     const arc = 2 * Math.PI / sectors;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     names.forEach((name, i) => {
         const angle = i * arc;
-        ctx.fillStyle = (i % 2 === 0) ? "#d00000" : "#1a1a1a"; // Roulette Colors
-        
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, centerX - 10, angle, angle + arc);
-        ctx.lineTo(centerX, centerY);
-        ctx.fill();
-        ctx.strokeStyle = "#d4af37"; // Gold border
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(angle + arc / 2);
-        ctx.textAlign = "right";
-        ctx.fillStyle = "white";
-        let fontSize = sectors > 15 ? 10 : 14;
-        ctx.font = `bold ${fontSize}px Arial`;
-        ctx.fillText(name, centerX - 30, 5);
-        ctx.restore();
+        ctx.fillStyle = (i % 2 === 0) ? "#d00000" : "#1a1a1a";
+        ctx.beginPath(); ctx.moveTo(250, 250);
+        ctx.arc(250, 250, 240, angle, angle + arc);
+        ctx.lineTo(250, 250); ctx.fill();
+        ctx.save(); ctx.translate(250, 250); ctx.rotate(angle + arc/2);
+        ctx.textAlign = "right"; ctx.fillStyle = "white";
+        ctx.font = "bold 16px Arial"; ctx.fillText(name, 230, 5); ctx.restore();
     });
 }
 
-// --- 4. REAL-TIME SYNC LOGIC ---
-
-// ADMIN: Sync names to database
+// 4. REAL-TIME SYNC
 nameInput.addEventListener('input', () => {
-    database.ref('liveWheel/names').set(nameInput.value);
+    db.ref('wheel/names').set(nameInput.value);
 });
 
-// ALL DEVICES: Listen for name updates
-database.ref('liveWheel/names').on('value', (snapshot) => {
-    const data = snapshot.val();
-    if (data !== null) {
-        nameInput.value = data;
-        updateNames();
-    }
+db.ref('wheel/names').on('value', (snap) => {
+    nameInput.value = snap.val() || "";
+    names = nameInput.value.split('\n').filter(n => n.trim() !== "");
+    drawWheel();
 });
 
-// ADMIN: Trigger Spin
 spinBtn.addEventListener('click', () => {
     if (isSpinning || names.length === 0) return;
-
-    // Calculate a unique rotation for this spin
-    const newRotation = currentRotation + (20 * Math.PI) + (Math.random() * 2 * Math.PI);
-    
-    // Upload the spin command to Firebase
-    database.ref('liveWheel/spinCommand').set({
-        targetRotation: newRotation,
-        startTime: Date.now() 
-    });
+    const target = currentRotation + (20 * Math.PI) + (Math.random() * 2 * Math.PI);
+    db.ref('wheel/spin').set({ target, time: Date.now() });
 });
 
-// ALL DEVICES: Listen for the spin command
-database.ref('liveWheel/spinCommand').on('value', (snapshot) => {
-    const data = snapshot.val();
+db.ref('wheel/spin').on('value', (snap) => {
+    const data = snap.val();
     if (data && !isSpinning) {
-        currentRotation = data.targetRotation;
-        runSpin(data.targetRotation);
+        currentRotation = data.target;
+        isSpinning = true;
+        canvas.style.transform = `rotate(${data.target}rad)`;
+        setTimeout(() => {
+            isSpinning = false;
+            calculateWinner(data.target);
+        }, 5000);
     }
 });
-
-function runSpin(target) {
-    isSpinning = true;
-    canvas.style.transform = `rotate(${target}rad)`;
-
-    setTimeout(() => {
-        isSpinning = false;
-        calculateWinner(target);
-    }, 5000);
-}
-
-// --- 5. WINNER & HISTORY LOGIC ---
 
 function calculateWinner(rotation) {
     const arc = 2 * Math.PI / names.length;
-    const relativeRotation = rotation % (2 * Math.PI);
-    const pointerAngle = 1.5 * Math.PI; // Top position
-    
-    let winningIndex = Math.floor((pointerAngle - relativeRotation + 4 * Math.PI) % (2 * Math.PI) / arc);
-    winningIndex = (winningIndex + names.length) % names.length;
-
-    const winner = names[winningIndex];
-    winnerText.innerText = winner;
-    winnerPopup.classList.remove('hidden');
-
-    // ONLY the person who triggered the spin (Admin) records to history
-    // We check this by seeing if the Admin Panel is currently visible
-    if (!document.getElementById('admin-tab').classList.contains('hidden')) {
-        recordResult(winner);
+    const winningIndex = Math.floor((1.5 * Math.PI - (rotation % (2 * Math.PI)) + 4 * Math.PI) % (2 * Math.PI) / arc);
+    const winner = names[(winningIndex + names.length) % names.length];
+    document.getElementById('winner-text').innerText = winner;
+    document.getElementById('winner-popup').classList.remove('hidden');
+    if (!document.getElementById('admin-content').classList.contains('hidden')) {
+        db.ref('wheel/history').push({ name: winner, time: new Date().toLocaleTimeString() });
     }
 }
 
-function recordResult(winner) {
-    database.ref('liveWheel/history').push({
-        name: winner,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    });
-}
-
-// ALL DEVICES: Sync History List
-database.ref('liveWheel/history').on('value', (snapshot) => {
+db.ref('wheel/history').on('value', (snap) => {
     historyList.innerHTML = "";
-    snapshot.forEach(child => {
-        const item = child.val();
+    snap.forEach(child => {
         const li = document.createElement('li');
-        li.innerHTML = `<strong>${item.name}</strong> <small style="float:right">${item.time}</small>`;
+        li.innerHTML = `<b>${child.val().name}</b> <small>${child.val().time}</small>`;
         historyList.prepend(li);
     });
 });
 
-function clearHistory() {
-    if (confirm("Clear all results for everyone?")) {
-        database.ref('liveWheel/history').remove();
-    }
-}
-
-closeBtn.addEventListener('click', () => winnerPopup.classList.add('hidden'));
-
-// Initial Draw
-updateNames();
-function showTab(tabName) {
-    // 1. Hide BOTH content areas
-    document.getElementById('history-content').classList.add('hidden');
-    document.getElementById('admin-content').classList.add('hidden');
-    
-    // 2. Remove 'active' styling from both buttons
-    document.getElementById('tab-history').classList.remove('active');
-    document.getElementById('tab-admin').classList.remove('active');
-
-    // 3. Show the one you clicked
-    document.getElementById(tabName + '-content').classList.remove('hidden');
-    document.getElementById('tab-' + tabName).classList.add('active');
-}
-function checkAdminPassword() {
-    const entry = prompt("Enter Admin Password:");
-    if (entry === "1234") {
-        showTab('admin');
-    } else {
-        alert("Incorrect Password");
-    }
-}
-
-
+function clearHistory() { if(confirm("Clear all?")) db.ref('wheel/history').remove(); }
