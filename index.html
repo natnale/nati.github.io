@@ -3,70 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Roulette Mobile App</title>
+    <title>Royal Roulette - Premium Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="mobile-mode">
+<body class="royal-theme">
+
+    <div class="glow-bg"></div>
 
     <main id="app-content">
         <section id="view-wheel" class="app-view active">
-            <div class="header"><h1>የቀጥታ ሩሌት</h1></div>
-            <div class="wheel-container">
-                <div class="pointer"></div>
+            <div class="top-bar">
+                <span class="live-tag">● LIVE</span>
+                <h1 class="logo">ROYAL <span>ROULETTE</span></h1>
+            </div>
+            
+            <div class="wheel-stage">
+                <div class="pointer-diamond"></div>
+                <div class="wheel-shadow"></div>
                 <canvas id="wheelCanvas" width="500" height="500"></canvas>
             </div>
-            <div id="current-round-label" class="round-badge">ዙር 1 ለመጀመር ዝግጁ</div>
+
+            <div class="status-panel">
+                <div class="round-badge">ዙር <span id="round-num-display">1</span></div>
+                <p id="status-text">ሽክርክሪቱን በመጠባበቅ ላይ...</p>
+            </div>
         </section>
 
         <section id="view-players" class="app-view">
-            <div class="header"><h1>ተጫዋቾች (1-20)</h1></div>
-            <div class="player-grid">
+            <div class="view-header"><h1>ተጫዋቾች</h1></div>
+            <div class="glass-board">
                 <div id="board-left" class="board-col"></div>
                 <div id="board-right" class="board-col"></div>
             </div>
         </section>
 
         <section id="view-history" class="app-view">
-            <div class="header"><h1>የአሸናፊዎች ታሪክ</h1></div>
-            <ul id="historyList" class="mobile-log"></ul>
+            <div class="view-header"><h1>የአሸናፊዎች ታሪክ</h1></div>
+            <div class="log-container">
+                <ul id="historyList" class="premium-log"></ul>
+            </div>
         </section>
 
         <section id="view-admin" class="app-view">
-            <div class="header"><h1>አስተዳዳሪ</h1></div>
-            <div class="admin-controls">
-                <button id="spinBtn" class="spin-btn">🚀 አሽከርክር (SPIN)</button>
+            <div class="view-header"><h1>አስተዳዳሪ</h1></div>
+            <div class="admin-panel">
+                <button id="spinBtn" class="gold-btn spin-main">🚀 SPIN</button>
                 <button class="reset-btn" onclick="clearHistory()">ታሪክ አጥፋ</button>
-                <div class="editor-label">ስሞችን በየመስመሩ ያስገቡ (1-20):</div>
-                <textarea id="nameInput" spellcheck="false"></textarea>
+                <div class="input-wrap">
+                    <label>የተጫዋቾች ዝርዝር (1-20):</label>
+                    <textarea id="nameInput" spellcheck="false"></textarea>
+                </div>
             </div>
         </section>
     </main>
 
-    <nav class="bottom-nav">
-        <button onclick="switchView('wheel')" class="nav-item active" id="nav-wheel">🎡 ዊል</button>
-        <button onclick="switchView('players')" class="nav-item" id="nav-players">👥 ተጫዋቾች</button>
-        <button onclick="switchView('history')" class="nav-item" id="nav-history">📜 ታሪክ</button>
-        <button onclick="checkAdminPassword()" class="nav-item" id="nav-admin">⚙️ Admin</button>
+    <nav class="glass-nav">
+        <button onclick="switchView('wheel')" class="nav-item active" id="nav-wheel">🎡 <span>ዊል</span></button>
+        <button onclick="switchView('players')" class="nav-item" id="nav-players">👥 <span>ተጫዋቾች</span></button>
+        <button onclick="switchView('history')" class="nav-item" id="nav-history">📜 <span>ታሪክ</span></button>
+        <button onclick="checkAdminPassword()" class="nav-item" id="nav-admin">⚙️ <span>Admin</span></button>
     </nav>
 
     <div id="winner-popup" class="hidden">
-        <div class="popup-card">
-            <div class="confetti-icon">🎊</div>
-            <h2 id="round-title">የዙሩ አሸናፊ!</h2>
-            <div class="result-box">
-                <div class="res-row">
-                    <span class="res-label">ቁጥር:</span>
-                    <span id="win-num" class="res-val"></span>
-                </div>
-                <div class="res-row">
-                    <span class="res-label">ስም:</span>
-                    <span id="win-name" class="res-val"></span>
-                </div>
-            </div>
-            <div id="win-time" class="time-label"></div>
-            <button class="confirm-btn" onclick="closePopup()">ቀጥል</button>
+        <div class="glass-popup">
+            <div class="crown">👑</div>
+            <h2>እንኳን ደስ አለዎት!</h2>
+            <div class="win-circle"><span id="win-num"></span></div>
+            <h1 id="win-name"></h1>
+            <p id="win-time" class="meta"></p>
+            <button class="claim-btn" onclick="closePopup()">ቀጥል</button>
         </div>
     </div>
 
