@@ -1,4 +1,81 @@
-const canvas = document.getElementById('wheelCanvas');
+// 1. Paste your Firebase Config here (from your Firebase Console)
+const firebaseConfig = {
+  apiKey: "AIzaSyBzsE17xYYr7ittaUbkUr85WJWaADTl4gw",
+  databaseURL: "https://spin-the-wheel-a5901-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "spin-the-wheel-a5901",
+};
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+// 2. Real-Time Sync: Names List
+// Only the Admin writes to the database when they type
+nameInput.addEventListener('input', () => {
+    database.ref('namesList').set(nameInput.value);
+});
+
+// Every device listens for name changes and updates their wheel instantly
+database.ref('namesList').on('value', (snapshot) => {
+    const remoteNames = snapshot.val();
+    if (remoteNames) {
+        nameInput.value = remoteNames;
+        updateNames(); // Redraws the wheel for everyone
+    }
+});
+
+// 3. Real-Time Sync: The Spin
+function spin() {
+    if (isSpinning || names.length === 0) return;
+    
+    // Admin calculates the "Winning Rotation"
+    const spinAmount = (20 * Math.PI) + (Math.random() * 2 * Math.PI);
+    
+    // Send the instruction to the cloud
+    database.ref('spinTrigger').set({
+        targetRotation: spinAmount,
+        time: Date.now() // Ensures a fresh event
+    });
+}
+
+// Every device waits for the "spinTrigger" signal
+database.ref('spinTrigger').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data && !isSpinning) {
+        // Everyone starts the 5-second animation at the same time
+        runSynchronizedSpin(data.targetRotation);
+    }
+});
+
+function runSynchronizedSpin(rotation) {
+    isSpinning = true;
+    canvas.style.transform = `rotate(${rotation}rad)`;
+
+    setTimeout(() => {
+        isSpinning = false;
+        calculateWinner(rotation); // Everyone sees the same winner
+    }, 5000);
+}
+
+// 4. Real-Time Sync: History
+function recordResult(winner) {
+    // Only Admin records to history to avoid duplicates
+    database.ref('history').push({
+        name: winner,
+        timestamp: new Date().toLocaleTimeString()
+    });
+}
+
+// Sync the history list for all devices
+database.ref('history').on('value', (snapshot) => {
+    const list = document.getElementById('historyList');
+    list.innerHTML = "";
+    snapshot.forEach(child => {
+        const item = child.val();
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>${item.name}</strong> <small>${item.timestamp}</small>`;
+        list.prepend(li);
+    });
+});const canvas = document.getElementById('wheelCanvas');
 const ctx = canvas.getContext('2d');
 const nameInput = document.getElementById('nameInput');
 const spinBtn = document.getElementById('spinBtn');
@@ -141,3 +218,4 @@ function clearHistory() {
 }
 
 // ... (keep the rest of your spin and drawing logic)
+
