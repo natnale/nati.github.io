@@ -1,133 +1,26 @@
-:root {
-    --gold: #d4af37;
-    --dark-bg: #121212;
-}
-
-body {
-    background: radial-gradient(circle, #2c3e50, #000);
-    color: white;
-    font-family: sans-serif;
-    margin: 0;
-    overflow-x: hidden;
-}
-
-.main-layout {
-    display: flex;
-    flex-direction: row; /* Desktop layout */
-    height: 100vh;
-}
-
-.wheel-section {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.container {
-    position: relative;
-    width: 100%;
-    max-width: 400px; /* Limits size so it doesn't overflow */
-}
-
-canvas {
-    width: 100% !important; /* Scales to fit screen */
-    height: auto !important;
-    border: 8px solid var(--gold);
-    border-radius: 50%;
-    transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1);
-}
-
-.pointer {
-    position: absolute;
-    top: -10px; left: 50%;
-    transform: translateX(-50%);
-    width: 0; height: 0;
-    border-left: 15px solid transparent;
-    border-right: 15px solid transparent;
-    border-top: 30px solid var(--gold);
-    z-index: 10;
-}
-
-/* Big Button for thumbs */
-button#spinBtn {
-    margin-top: 25px;
-    width: 80%;
-    max-width: 300px;
-    padding: 20px;
-    font-size: 20px;
-    font-weight: bold;
-    background: var(--gold);
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-}
-
-.sidebar {
-    flex: 1;
-    background: rgba(0,0,0,0.5);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-}
-
-textarea {
-    flex: 1;
-    min-height: 200px;
-    background: #000;
-    color: #fff;
-    border: 1px solid var(--gold);
-    padding: 10px;
-    font-size: 16px; /* Prevents iOS auto-zoom */
-}
-
-/* MOBILE ADJUSTMENTS */
-@media (max-width: 768px) {
-    .main-layout {
-        flex-direction: column; /* Stack vertically */
-        height: auto;
-    }
-    .wheel-section {
-        height: 80vh; /* Give wheel most of the screen */
-    }
-    .sidebar {
-        border-top: 2px solid var(--gold);
-    }
-}
-
-/* Popup */
-#winner-popup {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 100;
-}
-.popup-content { background: white; color: black; padding: 30px; border-radius: 20px; width: 80%; text-align: center; }
+:root { --gold: #d4af37; --red: #d00000; --dark: #1a1a1a; }
+body { background: #111; color: white; font-family: sans-serif; margin: 0; overflow-x: hidden; }
 .hidden { display: none !important; }
-/* Connection Status Light */
-#status-light {
-    width: 10px; height: 10px;
-    background: #00ff00;
-    border-radius: 50%;
-    box-shadow: 0 0 10px #00ff00;
-    margin-left: 10px;
+
+.main-layout { display: flex; height: 100vh; }
+.wheel-section { flex: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+canvas { width: 90%; max-width: 450px; border: 8px solid var(--gold); border-radius: 50%; transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1); }
+
+.sidebar { flex: 1; background: #222; border-left: 2px solid var(--gold); display: flex; flex-direction: column; }
+.tabs { display: flex; }
+.tab-btn { flex: 1; padding: 15px; border: none; background: #333; color: #888; cursor: pointer; }
+.tab-btn.active { background: #222; color: var(--gold); border-bottom: 2px solid var(--gold); }
+
+.tab-content { padding: 20px; flex: 1; overflow-y: auto; }
+textarea { width: 100%; height: 250px; background: #000; color: #0f0; border: 1px solid var(--gold); padding: 10px; margin-top: 10px; }
+
+.primary-btn { background: var(--gold); border: none; padding: 15px 40px; font-weight: bold; border-radius: 30px; margin-top: 20px; cursor: pointer; }
+.danger-btn { background: var(--red); color: white; border: none; width: 100%; padding: 10px; border-radius: 5px; cursor: pointer; }
+
+#status-light { width: 10px; height: 10px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 10px #00ff00; margin-left: 10px; }
+.header { display: flex; align-items: center; }
+
+@media (max-width: 768px) {
+    .main-layout { flex-direction: column; height: auto; }
+    .sidebar { height: 50vh; border-left: none; border-top: 2px solid var(--gold); }
 }
-
-.header { display: flex; align-items: center; margin-bottom: 20px; }
-
-/* Danger Button (Clear Results) */
-.danger-btn {
-    background: #ff4444;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
-    width: 100%;
-    font-weight: bold;
-    cursor: pointer;
-    margin-bottom: 15px;
-}
-
-.hint { font-size: 12px; color: #888; margin-top: 10px; }
