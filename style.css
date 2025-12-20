@@ -1,251 +1,37 @@
-/* --- 1. CORE STYLES & THEME --- */
-:root {
-    --gold: #d4af37;
-    --red: #d00000;
-    --dark-bg: #111111;
-    --sidebar-bg: #1a1a1a;
-    --text-light: #f0f0f0;
+:root { --gold: #d4af37; --red: #d00000; --dark: #111; }
+body { background: var(--dark); color: white; font-family: sans-serif; margin: 0; overflow: hidden; }
+.hidden { display: none !important; }
+
+.main-layout { display: flex; height: 100vh; }
+.wheel-section { flex: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+
+/* THE WHEEL (No Center Point) */
+.container { position: relative; width: 90%; max-width: 480px; }
+.pointer { 
+    position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent;
+    border-top: 40px solid var(--gold); z-index: 100;
+}
+canvas { 
+    width: 100%; border: 8px solid var(--gold); border-radius: 50%; 
+    /* 7 Seconds Clockwise Logic */
+    transition: transform 7s cubic-bezier(0.1, 0, 0, 1); 
 }
 
-body {
-    background: var(--dark-bg);
-    color: var(--text-light);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    overflow-x: hidden;
-    height: 100vh;
-}
+/* SIDEBAR & BUTTONS */
+.sidebar { flex: 1; background: #1a1a1a; border-left: 2px solid var(--gold); display: flex; flex-direction: column; }
+.tabs { display: flex; background: #000; }
+.tab-btn { flex: 1; padding: 15px; border: none; background: #222; color: #666; cursor: pointer; }
+.tab-btn.active { color: var(--gold); border-bottom: 2px solid var(--gold); background: #1a1a1a; }
+.tab-content { padding: 20px; flex: 1; overflow-y: auto; }
 
-.hidden {
-    display: none !important;
-}
+.admin-spin { width: 100%; background: #2e7d32; color: white; border: none; padding: 20px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 1.1rem; }
+.danger-btn { width: 100%; background: var(--red); color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
+textarea { width: 100%; height: 300px; background: #000; color: #0f0; border: 1px solid #444; margin-top: 10px; padding: 10px; font-size: 16px; box-sizing: border-box; }
 
-/* --- 2. MAIN LAYOUT --- */
-.main-layout {
-    display: flex;
-    flex-direction: row;
-    height: 100vh;
-}
+/* WINNER POPUP */
+#winner-popup { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); display: flex; align-items:center; justify-content:center; z-index:1000; backdrop-filter: blur(8px); }
+.popup-card { background: white; color: black; padding: 50px; border-radius: 25px; text-align: center; border: 6px solid var(--gold); }
+.popup-card h1 { font-size: 3.5rem; color: var(--red); margin: 15px 0; }
 
-/* --- 3. WHEEL SECTION --- */
-.wheel-section {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    position: relative;
-}
-
-.header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-#status-light {
-    width: 12px;
-    height: 12px;
-    background: #00ff00;
-    border-radius: 50%;
-    margin-left: 15px;
-    box-shadow: 0 0 10px #00ff00;
-}
-
-/* --- 4. THE WHEEL & FIXED POINTER --- */
-.container {
-    position: relative;
-    width: 90%;
-    max-width: 450px;
-}
-
-canvas {
-    width: 100%;
-    height: auto;
-    border: 10px solid var(--gold);
-    border-radius: 50%;
-    box-shadow: 0 0 30px rgba(0,0,0,0.5);
-    transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1);
-}
-
-/* THE FIXED POINTER (Needle) */
-.pointer {
-    position: absolute;
-    top: -20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0; 
-    height: 0; 
-    border-left: 20px solid transparent;
-    border-right: 20px solid transparent;
-    border-top: 45px solid var(--gold); /* Points down at the wheel */
-    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.8));
-    z-index: 100;
-}
-
-/* Wheel Hub (The center pin) */
-.container::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 25px;
-    height: 25px;
-    background: var(--gold);
-    border: 4px solid white;
-    border-radius: 50%;
-    z-index: 10;
-}
-
-/* --- 5. BUTTONS --- */
-.primary-btn {
-    background: linear-gradient(to bottom, #f1d479, var(--gold));
-    border: none;
-    padding: 18px 45px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #000;
-    border-radius: 50px;
-    margin-top: 30px;
-    cursor: pointer;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    transition: transform 0.2s;
-}
-
-.primary-btn:active {
-    transform: scale(0.95);
-}
-
-/* --- 6. SIDEBAR & TABS --- */
-.sidebar {
-    flex: 1;
-    background: var(--sidebar-bg);
-    border-left: 2px solid var(--gold);
-    display: flex;
-    flex-direction: column;
-}
-
-.tabs {
-    display: flex;
-    background: #000;
-}
-
-.tab-btn {
-    flex: 1;
-    padding: 20px;
-    border: none;
-    background: #222;
-    color: #777;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.tab-btn.active {
-    background: var(--sidebar-bg);
-    color: var(--gold);
-    border-bottom: 3px solid var(--gold);
-}
-
-.tab-content {
-    padding: 20px;
-    flex: 1;
-    overflow-y: auto;
-}
-
-#historyList {
-    list-style: none;
-    padding: 0;
-}
-
-#historyList li {
-    background: #2a2a2a;
-    padding: 12px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    border-left: 5px solid var(--gold);
-    display: flex;
-    justify-content: space-between;
-}
-
-/* --- 7. ADMIN PANEL ELEMENTS --- */
-.danger-btn {
-    background: var(--red);
-    color: white;
-    border: none;
-    padding: 12px;
-    width: 100%;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-bottom: 20px;
-}
-
-textarea {
-    width: 100%;
-    height: 300px;
-    background: #000;
-    color: #00ff00;
-    border: 1px solid #444;
-    padding: 12px;
-    font-family: monospace;
-    font-size: 16px;
-    border-radius: 8px;
-    box-sizing: border-box;
-}
-
-/* --- 8. FIXED WINNER POPUP --- */
-#winner-popup {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    backdrop-filter: blur(8px);
-}
-
-.popup-card {
-    background: white;
-    color: #111;
-    padding: 50px;
-    border-radius: 30px;
-    text-align: center;
-    border: 6px solid var(--gold);
-    box-shadow: 0 0 50px rgba(212, 175, 55, 0.6);
-}
-
-.popup-card h2 { color: #888; margin: 0; }
-.popup-card h1 { font-size: 4rem; margin: 15px 0; color: var(--red); }
-
-.popup-card button {
-    background: #111;
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-/* --- 9. MOBILE RESPONSIVENESS --- */
-@media (max-width: 768px) {
-    .main-layout {
-        flex-direction: column;
-        height: auto;
-    }
-    .wheel-section {
-        height: 70vh;
-    }
-    .sidebar {
-        height: 50vh;
-        border-left: none;
-        border-top: 2px solid var(--gold);
-    }
-    .popup-card h1 {
-        font-size: 2.5rem;
-    }
-}
+@media (max-width: 768px) { .main-layout { flex-direction: column; } .sidebar { height: 45vh; border-left: none; border-top: 2px solid var(--gold); } }
