@@ -1,79 +1,55 @@
 <!DOCTYPE html>
-<html lang="am">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Royal Roulette - Premium Edition</title>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Roulette Wheel</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="royal-theme">
+<body>
 
-    <div class="glow-bg"></div>
-
-    <main id="app-content">
-        <section id="view-wheel" class="app-view active">
-            <div class="top-bar">
-                <span class="live-tag">● LIVE</span>
-                <h1 class="logo">ROYAL <span>ROULETTE</span></h1>
-            </div>
-            
-            <div class="wheel-stage">
-                <div class="pointer-diamond"></div>
-                <div class="wheel-shadow"></div>
+    <div class="main-layout">
+        <div class="wheel-section">
+            <div class="container">
+                <div class="pointer"></div>
                 <canvas id="wheelCanvas" width="500" height="500"></canvas>
             </div>
-
-            <div class="status-panel">
-                <div class="round-badge">ዙር <span id="round-num-display">1</span></div>
-                <p id="status-text">ሽክርክሪቱን በመጠባበቅ ላይ...</p>
+            <div class="controls">
+                <button id="spinBtn">SPIN THE WHEEL</button>
             </div>
-        </section>
+        </div>
 
-        <section id="view-players" class="app-view">
-            <div class="view-header"><h1>ተጫዋቾች</h1></div>
-            <div class="glass-board">
-                <div id="board-left" class="board-col"></div>
-                <div id="board-right" class="board-col"></div>
-            </div>
-        </section>
-
-        <section id="view-history" class="app-view">
-            <div class="view-header"><h1>የአሸናፊዎች ታሪክ</h1></div>
-            <div class="log-container">
-                <ul id="historyList" class="premium-log"></ul>
-            </div>
-        </section>
-
-        <section id="view-admin" class="app-view">
-            <div class="view-header"><h1>አስተዳዳሪ</h1></div>
-            <div class="admin-panel">
-                <button id="spinBtn" class="gold-btn spin-main">🚀 SPIN</button>
-                <button class="reset-btn" onclick="clearHistory()">ታሪክ አጥፋ</button>
-                <div class="input-wrap">
-                    <label>የተጫዋቾች ዝርዝር (1-20):</label>
-                    <textarea id="nameInput" spellcheck="false"></textarea>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <nav class="glass-nav">
-        <button onclick="switchView('wheel')" class="nav-item active" id="nav-wheel">🎡 <span>ዊል</span></button>
-        <button onclick="switchView('players')" class="nav-item" id="nav-players">👥 <span>ተጫዋቾች</span></button>
-        <button onclick="switchView('history')" class="nav-item" id="nav-history">📜 <span>ታሪክ</span></button>
-        <button onclick="checkAdminPassword()" class="nav-item" id="nav-admin">⚙️ <span>Admin</span></button>
-    </nav>
+        <div class="sidebar">
+            <h3>Edit Names</h3>
+            <p>Enter names (one per line):</p>
+            <textarea id="nameInput" spellcheck="false">1. Alice
+2. Bob
+3. Charlie
+4. David
+5. Eva
+6. Frank
+7. Grace
+8. Henry
+9. Ivy
+10. Jack
+11. Kelly
+12. Liam
+13. Mia
+14. Noah
+15. Olivia
+16. Pete
+17. Quinn
+18. Ryan
+19. Sara
+20. Tom</textarea>
+        </div>
+    </div>
 
     <div id="winner-popup" class="hidden">
-        <div class="glass-popup">
-            <div class="crown">👑</div>
-            <h2>እንኳን ደስ አለዎት!</h2>
-            <div class="win-circle"><span id="win-num"></span></div>
-            <h1 id="win-name"></h1>
-            <p id="win-time" class="meta"></p>
-            <button class="claim-btn" onclick="closePopup()">ቀጥል</button>
+        <div class="popup-content">
+            <h2>We have a winner!</h2>
+            <h1 id="winner-text"></h1>
+            <button id="closeBtn">Continue</button>
         </div>
     </div>
 
