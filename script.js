@@ -6,181 +6,132 @@ const firebaseConfig = {
   projectId: "spin-the-wheel-a5901",
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// --- 2. DOM ELEMENTS ---
+// --- 2. GLOBAL VARIABLES ---
 const canvas = document.getElementById('wheelCanvas');
 const ctx = canvas.getContext('2d');
 const nameInput = document.getElementById('nameInput');
-const spinBtn = document.getElementById('spinBtn');
 const historyList = document.getElementById('historyList');
-const winnerPopup = document.getElementById('winner-popup');
-const winnerText = document.getElementById('winner-text');
+
+const colors = [
+    "#FF5733","#33FF57","#3357FF","#F333FF","#FF3383","#33FFF5","#FFB833","#8D33FF",
+    "#33FF8D","#FF3333","#DBFF33","#33DBFF","#00A86B","#FF7F50","#6A5ACD","#FFD700",
+    "#FF1493","#00CED1","#ADFF2F","#FF4500"
+];
 
 let names = [];
 let isSpinning = false;
-let currentRotation = 0;
+let currentTotalRotation = 0;
 
-// --- 3. 12-COLOR PALETTE ---
-const segmentColors = [
-    "#FF5733", "#33FF57", "#3357FF", "#F333FF", 
-    "#FF3383", "#33FFF5", "#FFB833", "#8D33FF", 
-    "#33FF8D", "#FF3333", "#DBFF33", "#33DBFF"
-];
-
-// --- 4. WHEEL DRAWING LOGIC ---
-function updateNames() {
-    names = nameInput.value.split('\n').filter(n => n.trim() !== "");
-    drawWheel();
-}
-
+// --- 3. WHEEL DRAWING ---
 function drawWheel() {
+    names = nameInput.value.split('\n').filter(n => n.trim() !== "");
     const sectors = names.length;
     if (sectors === 0) return;
-    
-    const arc = 2 * Math.PI / sectors;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+    const arc = (2 * Math.PI) / sectors;
+    const centerX = 250, centerY = 250;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+    ctx.clearRect(0, 0, 500, 500);
     names.forEach((name, i) => {
         const angle = i * arc;
-        
-        // Background slice
-        ctx.fillStyle = segmentColors[i % segmentColors.length];
+        ctx.fillStyle = colors[i % colors.length];
         ctx.beginPath();
         ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, centerX - 10, angle, angle + arc);
+        ctx.arc(centerX, centerY, 245, angle, angle + arc);
         ctx.lineTo(centerX, centerY);
         ctx.fill();
-        
-        // Border
-        ctx.strokeStyle = "white";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = "rgba(255,255,255,0.2)";
         ctx.stroke();
 
-        // Text labels
         ctx.save();
         ctx.translate(centerX, centerY);
         ctx.rotate(angle + arc / 2);
-        ctx.textAlign = "right";
-        ctx.fillStyle = "white";
-        ctx.shadowBlur = 4;
-        ctx.shadowColor = "black";
-        ctx.font = "bold 18px Arial";
-        ctx.fillText(name, centerX - 40, 10);
+        ctx.textAlign = "right"; ctx.fillStyle = "white";
+        ctx.font = sectors > 15 ? "bold 12px Arial" : "bold 16px Arial";
+        ctx.fillText(name, 230, 5);
         ctx.restore();
     });
 }
 
-// --- 5. TABS & ADMIN LOGIC ---
+// --- 4. ADMIN & TAB LOGIC ---
 function checkAdminPassword() {
-    const pass = prompt("Enter Admin Password:");
-    if (pass === "1234") {
-        showTab('admin');
-    } else {
-        alert("Access Denied");
-    }
+    if (prompt("Enter Admin Password:") === "1234") { showTab('admin'); }
+    else { alert("Wrong Password!"); }
 }
 
-function showTab(tabName) {
-    document.getElementById('history-content').classList.add('hidden');
-    document.getElementById('admin-content').classList.add('hidden');
-    document.getElementById('tab-history').classList.remove('active');
-    document.getElementById('tab-admin').classList.remove('active');
-
-    document.getElementById(tabName + '-content').classList.remove('hidden');
-    document.getElementById('tab-' + tabName).classList.add('active');
+function showTab(tab) {
+    document.getElementById('history-content').classList.toggle('hidden', tab !== 'history');
+    document.getElementById('admin-content').classList.toggle('hidden', tab !== 'admin');
+    document.getElementById('tab-history').classList.toggle('active', tab === 'history');
+    document.getElementById('tab-admin').classList.toggle('active', tab === 'admin');
 }
 
-// --- 6. REAL-TIME SYNC (FIREBASE) ---
+// --- 5. SPIN LOGIC (FIXED) ---
+document.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'spinBtn') {
+        if (isSpinning || names.length === 0) return;
+        
+        // Always add to rotation (Clockwise Only)
+        const addedRotation = (15 * 2 * Math.PI) + (Math.random() * 2 * Math.PI);
+        const nextRotation = currentTotalRotation + addedRotation;
 
-// ADMIN: Sync names to cloud
-nameInput.addEventListener('input', () => {
-    db.ref('liveWheel/names').set(nameInput.value);
-});
-
-// ALL DEVICES: Update wheel when names change in cloud
-db.ref('liveWheel/names').on('value', (snap) => {
-    const val = snap.val();
-    if (val !== null) {
-        nameInput.value = val;
-        updateNames();
+        db.ref('wheel/spin').set({
+            target: nextRotation,
+            time: Date.now()
+        });
     }
 });
 
-// ADMIN: Send Spin Command
-spinBtn.addEventListener('click', () => {
-    if (isSpinning || names.length === 0) return;
-    
-    // Calculate new target rotation
-    const spinAmount = (20 * Math.PI) + (Math.random() * 2 * Math.PI);
-    const newTotalRotation = currentRotation + spinAmount;
-
-    db.ref('liveWheel/spinEvent').set({
-        targetRotation: newTotalRotation,
-        timestamp: Date.now()
-    });
-});
-
-// ALL DEVICES: Run the spin animation
-db.ref('liveWheel/spinEvent').on('value', (snap) => {
+db.ref('wheel/spin').on('value', snap => {
     const data = snap.val();
     if (data && !isSpinning) {
-        currentRotation = data.targetRotation;
         isSpinning = true;
-        canvas.style.transform = `rotate(${data.targetRotation}rad)`;
+        currentTotalRotation = data.target;
+        canvas.style.transform = `rotate(${data.target}rad)`;
 
         setTimeout(() => {
             isSpinning = false;
-            calculateWinner(data.targetRotation);
-        }, 5000);
+            processWinner(data.target);
+        }, 7000); // Wait for 7s animation
     }
 });
 
-// --- 7. WINNER & HISTORY ---
-function calculateWinner(rotation) {
-    const sectors = names.length;
-    const arc = (2 * Math.PI) / sectors;
-    
-    // 1.5 * PI is the top (12 o'clock) where the pointer is
-    const actualRotation = rotation % (2 * Math.PI);
-    let winningIndex = Math.floor((1.5 * Math.PI - actualRotation + 4 * Math.PI) % (2 * Math.PI) / arc);
-    winningIndex = (winningIndex % sectors + sectors) % sectors;
+// --- 6. WINNER & SYNC ---
+function processWinner(rot) {
+    const arc = (2 * Math.PI) / names.length;
+    const normalized = rot % (2 * Math.PI);
+    let winningIndex = Math.floor((1.5 * Math.PI - normalized + 10 * Math.PI) % (2 * Math.PI) / arc);
+    winningIndex = (winningIndex % names.length + names.length) % names.length;
 
     const winner = names[winningIndex];
-    winnerText.innerText = winner;
-    winnerPopup.classList.remove('hidden');
+    document.getElementById('winner-text').innerText = winner;
+    document.getElementById('winner-popup').classList.remove('hidden');
 
-    // ONLY the Admin records result to history to avoid duplicates
-    const isAdminOpen = !document.getElementById('admin-content').classList.contains('hidden');
-    if (isAdminOpen) {
-        db.ref('liveWheel/history').push({
-            name: winner,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        });
+    // Admin records history to prevent duplicates
+    if (!document.getElementById('admin-content').classList.contains('hidden')) {
+        db.ref('wheel/history').push({ name: winner, time: new Date().toLocaleTimeString() });
     }
 }
 
-// ALL DEVICES: Sync History List
-db.ref('liveWheel/history').on('value', (snap) => {
+// Sync Names and History
+nameInput.addEventListener('input', () => db.ref('wheel/names').set(nameInput.value));
+db.ref('wheel/names').on('value', snap => {
+    nameInput.value = snap.val() || "";
+    drawWheel();
+});
+
+db.ref('wheel/history').on('value', snap => {
     historyList.innerHTML = "";
-    snap.forEach(child => {
-        const item = child.val();
+    snap.forEach(c => {
         const li = document.createElement('li');
-        li.innerHTML = `<strong>${item.name}</strong> <small>${item.time}</small>`;
+        li.style.cssText = "background:#222; margin:5px 0; padding:10px; border-radius:5px; list-style:none; display:flex; justify-content:space-between;";
+        li.innerHTML = `<span>${c.val().name}</span> <small style="color:var(--gold)">${c.val().time}</small>`;
         historyList.prepend(li);
     });
 });
 
-function clearHistory() {
-    if (confirm("Clear results for everyone?")) {
-        db.ref('liveWheel/history').remove();
-    }
-}
+function clearHistory() { if(confirm("Clear log?")) db.ref('wheel/history').remove(); }
 
-// Initial draw on load
-updateNames();
+drawWheel();
