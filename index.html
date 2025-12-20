@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="am">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Live 20-Player Roulette</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>የቀጥታ ሩሌት ውድድር</title>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="style.css">
@@ -13,64 +13,75 @@
     <div class="main-layout">
         <div class="wheel-section">
             <div class="header">
-                <h1>Live Roulette</h1>
-                <div id="status-light" title="Connected"></div>
+                <h1>የቀጥታ ሩሌት ውድድር</h1>
+                <div id="status-light"></div>
             </div>
             
-            <div class="container">
-                <div class="pointer"></div>
-                <canvas id="wheelCanvas" width="500" height="500"></canvas>
+            <div class="game-container">
+                <div id="board-left" class="side-board"></div>
+
+                <div class="wheel-wrapper">
+                    <div class="container">
+                        <div class="pointer"></div>
+                        <canvas id="wheelCanvas" width="500" height="500"></canvas>
+                    </div>
+                </div>
+
+                <div id="board-right" class="side-board"></div>
             </div>
-            <p class="viewer-hint">Waiting for Admin to spin...</p>
         </div>
 
         <div class="sidebar">
             <div class="tabs">
-                <button class="tab-btn active" id="tab-history" onclick="showTab('history')">Results</button>
-                <button class="tab-btn" id="tab-admin" onclick="checkAdminPassword()">Admin</button>
+                <button class="tab-btn active" id="tab-history" onclick="showTab('history')">የአሸናፊዎች ዝርዝር</button>
+                <button class="tab-btn" id="tab-admin" onclick="checkAdminPassword()">አስተዳዳሪ (Admin)</button>
             </div>
 
             <div id="history-content" class="tab-content">
-                <ul id="historyList"></ul>
+                <ul id="historyList" class="res-list"></ul>
             </div>
 
             <div id="admin-content" class="tab-content hidden">
                 <div class="admin-wrap">
-                    <button id="spinBtn" class="primary-btn admin-spin">🚀 SPIN FOR EVERYONE</button>
-                    
-                    <button class="danger-btn" onclick="clearHistory()">CLEAR LOG</button>
+                    <button id="spinBtn" class="primary-btn admin-spin">🚀 ጨዋታውን ጀምር (SPIN)</button>
+                    <div class="admin-res-preview">
+                        <p><strong>የአሸናፊዎች ታሪክ:</strong></p>
+                        <ul id="adminHistoryList" class="res-list"></ul>
+                    </div>
+                    <button class="danger-btn" onclick="clearHistory()">ታሪኩን አጥፋ</button>
                     <hr>
-                    <label>Player List (20):</label>
-                    <textarea id="nameInput" spellcheck="false">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20</textarea>
+                    <div class="editor-container">
+                        <div class="number-col">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20</div>
+                        <textarea id="nameInput" spellcheck="false" placeholder="የተጫዋቾችን ስም እዚህ ያስገቡ..."></textarea>
+                    </div>
                 </div>
             </div>
         </div>
+    </div><div id="winner-popup" class="hidden">
+    <div class="popup-card">
+        <div class="confetti-icon">🎉</div>
+        <h2 id="round-title">የዙሩ አሸናፊ ተለይቷል!</h2>
+        <hr>
+        <div class="winner-info">
+            <div class="info-group">
+                <span class="label">ቁጥር:</span>
+                <span id="win-number" class="val"></span>
+            </div>
+            <div class="info-group">
+                <span class="label">ስም:</span>
+                <span id="win-name" class="val"></span>
+            </div>
+        </div>
+        <div id="win-time" class="time-stamp"></div>
+        <button class="close-btn" onclick="document.getElementById('winner-popup').classList.add('hidden')">ቀጥል</button>
     </div>
+</div>
 
     <div id="winner-popup" class="hidden">
         <div class="popup-card">
-            <h2>The Winner Is:</h2>
+            <h2 id="round-title">የዚህ ዙር አሸናፊ!</h2>
             <h1 id="winner-text"></h1>
-            <button onclick="document.getElementById('winner-popup').classList.add('hidden')">Close</button>
+            <button onclick="document.getElementById('winner-popup').classList.add('hidden')">ቀጥል</button>
         </div>
     </div>
 
